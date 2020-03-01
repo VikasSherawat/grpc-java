@@ -1,4 +1,4 @@
-package com.vikas.grpc;
+package com.vikas.grpc.server;
 
 import java.io.IOException;
 
