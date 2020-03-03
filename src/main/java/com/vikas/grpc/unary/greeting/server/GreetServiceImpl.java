@@ -1,4 +1,4 @@
-package com.vikas.grpc.server;
+package com.vikas.grpc.unary.greeting.server;
 
 import com.proto.greet.GreetRequest;
 import com.proto.greet.GreetResponse;

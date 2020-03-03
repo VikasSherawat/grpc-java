@@ -1,15 +1,18 @@
-package com.vikas.grpc.server;
+package com.vikas.grpc.unary.calculator.server;
 
 import java.io.IOException;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
-public class GreetingServer {
+public class CalculatorServer {
+
+    public static final int PORT = 50052;
+
     public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.println("Starting gRPC Server--");
-        Server server = ServerBuilder.forPort(50051)
-                .addService(new GreetServiceImpl())
+        System.out.println("Staring Calculator Service");
+        Server server = ServerBuilder.forPort(PORT)
+                .addService(new CalculatorServiceImpl())
                 .build();
         server.start();
 
@@ -20,5 +23,6 @@ public class GreetingServer {
         }));
 
         server.awaitTermination();
+
     }
 }
