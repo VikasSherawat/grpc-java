@@ -1,6 +1,7 @@
 package com.vikas.grpc.unary.calculator.client;
 
 import com.proto.calculator.CalculatorServiceGrpc;
+import com.proto.calculator.PrimeNumberDecompositionRequest;
 import com.proto.calculator.SumRequest;
 import com.proto.calculator.SumResponse;
 import com.vikas.grpc.unary.calculator.server.CalculatorServer;
@@ -18,10 +19,14 @@ public class CalculatorClient {
                 .usePlaintext()
                 .build();
 
-        CalculatorServiceGrpc.CalculatorServiceFutureStub client = CalculatorServiceGrpc.newFutureStub(channel);
-        int a= 17, b = 21;
-        SumRequest request = SumRequest.newBuilder().setFirstNumber(a).setSecondNumber(b).build();
-        Future<SumResponse> response = client.sum(request);
-        System.out.println("Result is "+response.get().getResult());
+        CalculatorServiceGrpc.CalculatorServiceBlockingStub client = CalculatorServiceGrpc.newBlockingStub(channel);
+
+        PrimeNumberDecompositionRequest request = PrimeNumberDecompositionRequest.newBuilder()
+                .setNumber(567890304)
+                .build();
+        client.primeNumberDecomposition(request)
+                .forEachRemaining(r->
+                        System.out.println(r.getPrimeFactor())
+                );
     }
 }
