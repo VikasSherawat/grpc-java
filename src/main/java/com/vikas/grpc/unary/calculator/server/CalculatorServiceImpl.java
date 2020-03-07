@@ -1,6 +1,8 @@
 package com.vikas.grpc.unary.calculator.server;
 
 import com.proto.calculator.CalculatorServiceGrpc;
+import com.proto.calculator.ComputeAverageRequest;
+import com.proto.calculator.ComputeAverageResponse;
 import com.proto.calculator.PrimeNumberDecompositionRequest;
 import com.proto.calculator.PrimeNumberDecompositionResponse;
 import com.proto.calculator.SumRequest;
@@ -37,5 +39,36 @@ public class CalculatorServiceImpl extends CalculatorServiceGrpc.CalculatorServi
         }
 
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<ComputeAverageRequest> computeAverage(StreamObserver<ComputeAverageResponse> responseObserver) {
+        StreamObserver<ComputeAverageRequest> requestObserver = new StreamObserver<ComputeAverageRequest>() {
+            int sum = 0;
+            int count = 0;
+            @Override
+            public void onNext(ComputeAverageRequest value) {
+                sum += value.getNumber();
+                count++;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Error Occured");
+                t.printStackTrace();
+            }
+
+            @Override
+            public void onCompleted() {
+                double average = (double) sum / count;
+                responseObserver.onNext(ComputeAverageResponse.newBuilder()
+                        .setAverage(average)
+                        .build());
+
+                responseObserver.onCompleted();
+            }
+        };
+
+        return requestObserver;
     }
 }
