@@ -3,6 +3,8 @@ package com.vikas.grpc.unary.calculator.server;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.ComputeAverageRequest;
 import com.proto.calculator.ComputeAverageResponse;
+import com.proto.calculator.FindMaximumRequest;
+import com.proto.calculator.FindMaximumResponse;
 import com.proto.calculator.PrimeNumberDecompositionRequest;
 import com.proto.calculator.PrimeNumberDecompositionResponse;
 import com.proto.calculator.SumRequest;
@@ -65,6 +67,37 @@ public class CalculatorServiceImpl extends CalculatorServiceGrpc.CalculatorServi
                         .setAverage(average)
                         .build());
 
+                responseObserver.onCompleted();
+            }
+        };
+
+        return requestObserver;
+    }
+
+    @Override
+    public StreamObserver<FindMaximumRequest> findMaximum(StreamObserver<FindMaximumResponse> responseObserver) {
+        StreamObserver<FindMaximumRequest> requestObserver = new StreamObserver<FindMaximumRequest>() {
+            int max = Integer.MIN_VALUE;
+            @Override
+            public void onNext(FindMaximumRequest value) {
+                if(value.getNumber()>max) {
+                    max = value.getNumber();
+                    responseObserver.onNext(FindMaximumResponse.newBuilder()
+                            .setMaximum(max)
+                            .build());
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Error Occured");
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(FindMaximumResponse.newBuilder()
+                        .setMaximum(max)
+                        .build());
                 responseObserver.onCompleted();
             }
         };

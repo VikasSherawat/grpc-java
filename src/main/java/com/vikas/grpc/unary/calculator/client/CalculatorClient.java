@@ -3,15 +3,19 @@ package com.vikas.grpc.unary.calculator.client;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.ComputeAverageRequest;
 import com.proto.calculator.ComputeAverageResponse;
+import com.proto.calculator.FindMaximumRequest;
+import com.proto.calculator.FindMaximumResponse;
 import com.proto.calculator.PrimeNumberDecompositionRequest;
 import com.proto.calculator.SumRequest;
 import com.proto.calculator.SumResponse;
 import com.vikas.grpc.unary.calculator.server.CalculatorServer;
 
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -31,10 +35,46 @@ public class CalculatorClient {
 
         //doUnaryCall();
         //doServerStreamingCall();
-        doClientStreamingCall();
+        //doClientStreamingCall(10);
+        doBiDirectionalStreamingCall();
     }
+    private void doBiDirectionalStreamingCall() {
+        CalculatorServiceGrpc.CalculatorServiceStub asyncClient = CalculatorServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+        StreamObserver<FindMaximumRequest> request = asyncClient.findMaximum(new StreamObserver<FindMaximumResponse>() {
+            @Override
+            public void onNext(FindMaximumResponse value) {
+                System.out.println("Got New Maximum from server: "+value.getMaximum());
+            }
 
-    private void doClientStreamingCall() {
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server has finished sending data");
+            }
+        });
+
+        Random random = new Random();
+        for (int i = 0; i < 1000; i++) {
+            request.onNext(FindMaximumRequest.newBuilder()
+                    .setNumber(random.nextInt(1000))
+                    .build());
+        }
+
+        try {
+            request.onCompleted();
+            latch.await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+    private void doClientStreamingCall(int n) {
         CalculatorServiceGrpc.CalculatorServiceStub asyncClient = CalculatorServiceGrpc.newStub(channel);
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -57,7 +97,7 @@ public class CalculatorClient {
             }
         });
 
-        for (int i = 0; i < 1232; i++) {
+        for (int i = 1; i <= n; i++) {
             requestObserver.onNext(ComputeAverageRequest.newBuilder()
                     .setNumber(i)
                     .build());
